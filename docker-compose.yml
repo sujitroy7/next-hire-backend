@@ -21,11 +21,11 @@ services:
       - "6379:6379"
 
   api:
-    build: ./apis
+    build: .
     container_name: next_hire_api
     command: pnpm dev
     volumes:
-      - ./apis:/app
+      - .:/app
       - /app/node_modules
     ports:
       - "4000:4000"
@@ -34,20 +34,6 @@ services:
     depends_on:
       - postgres
       - redis
-
-  client:
-    build: ./client
-    container_name: next_hire_client
-    command: pnpm dev
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:4000
-    depends_on:
-      - api
 
 volumes:
   postgres_data:
