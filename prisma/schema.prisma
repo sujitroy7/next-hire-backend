@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserType {
+  ORGANIZATION
+  RECRUITER
+  CANDIDATE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  TEMPORARY
+  INTERNSHIP
+  CONTRACTUAL
+}
+
+enum ApplicationStatus {
+  APPLIED
+  REVIEWING
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  userType     UserType @default(CANDIDATE)
+  createdAt    DateTime @default(now())
+  addressId    String?  @unique
+
+  organizationProfile OrganizationProfile?
+  recruiterProfile    RecruiterProfile?
+  candidateProfile    CandidateProfile?
+  address             Address?             @relation(fields: [addressId], references: [id])
+}
+
+model OrganizationType {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  organizationProfiles OrganizationProfile[]
+}
+
+model OrganizationProfile {
+  id                 String  @id @default(uuid())
+  userId             String  @unique
+  name               String
+  about              String?
+  isActive           Boolean @default(true)
+  isVerified         Boolean @default(true)
+  organizationTypeId Int?
+
+  publicEmail String?
+  publicPhone String?
+  websiteUrl  String?
+  linkedinUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationType OrganizationType? @relation(fields: [organizationTypeId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+
+  jobs Job[]
+}
+
+model RecruiterProfile {
+  id        String @id @default(uuid())
+  firstName String
+  lastName  String
+
+  publicEmail String?
+  publicPhone String?
+  linkedinUrl String?
+  about       String?
+
+  isActive Boolean @default(true)
+
+  // relation with user-table
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  jobs Job[]
+}
+
+model CandidateProfile {
+  id        String @id @default(uuid())
+  firstName String
+  lastName  String
+
+  headline    String?
+  bio         String?
+  publicPhone String?
+  publicEmail String?
+  linkedinUrl String?
+  websiteUrl  String?
+
+  isActive     Boolean @default(true)
+  isVerified   Boolean @default(true)
+  isOpenToWork Boolean @default(true)
+
+  experiences CandidateExperience[]
+
+  // relation with user-table
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  jobApplications JobApplication[]
+}
+
+model CandidateExperience {
+  id String @id @default(uuid())
+
+  companyName    String
+  jobTitle       String
+  employmentType EmploymentType
+  description    String?
+  location       String?
+
+  startDate DateTime
+  endDate   DateTime?
+
+  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id])
+  candidateProfileId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id String @id @default(uuid())
+
+  country     String
+  state       String?
+  city        String
+  streetLine1 String
+  streetLine2 String?
+  postalCode  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User?
+}
+
+model Job {
+  id                    String @id @default(uuid())
+  organizationProfileId String
+  recruiterProfileId    String
+
+  title       String
+  description String
+
+  employmentType EmploymentType
+  salaryMin      Int?
+  salaryMax      Int?
+
+  isActive    Boolean   @default(true)
+  publishedAt DateTime?
+  // expiresAt   DateTime? // introduce later
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  organizationProfile OrganizationProfile? @relation(fields: [organizationProfileId], references: [id])
+  recruiterProfile    RecruiterProfile?    @relation(fields: [recruiterProfileId], references: [id])
+  jobApplications     JobApplication[]
+}
+
+model JobApplication {
+  id          String            @id @default(uuid())
+  jobId       String
+  candidateId String
+  status      ApplicationStatus @default(APPLIED)
+  appliedAt   DateTime          @default(now())
+
+  job       Job              @relation(fields: [jobId], references: [id])
+  candidate CandidateProfile @relation(fields: [candidateId], references: [id])
+
+  @@unique([jobId, candidateId])
+}
