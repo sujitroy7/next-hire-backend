@@ -1,3 +1,5 @@
+import { ZodError } from "zod";
+
 export const validateRequest = (schema) => {
   return function (req, res, next) {
     try {
@@ -21,4 +23,4 @@ export const validateRequest = (schema) => {
     }
   };
 
-}
+};
