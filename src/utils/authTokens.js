@@ -69,3 +69,14 @@ export const getRefreshCookieOptions = () => ({
   maxAge: REFRESH_TOKEN_TTL_MS,
   path: "/auth/refresh",
 });
+
+export const getRequestTokens = (req) => {
+  let authToken = req.cookies?.["auth-token"];
+  let refreshToken = req.cookies?.["refresh-token"];
+
+  if (!authToken) {
+    authToken = req.headers?.authorization?.split(" ")?.[1];
+  }
+
+  return { authToken, refreshToken };
+};
