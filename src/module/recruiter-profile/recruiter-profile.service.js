@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 
-export const createRecruiterProfile = async (data) => {
+export const createRecruiterProfile = async (data, prismaClient = prisma) => {
   const {
     userId,
     organizationId,
@@ -13,13 +13,13 @@ export const createRecruiterProfile = async (data) => {
     isActive = true,
   } = data;
 
-  const alreadyExist = await prisma.organizationProfile.findFirst({
+  const alreadyExist = await prismaClient.organizationProfile.findFirst({
     where: { userId },
   });
 
   if (alreadyExist) throw new Error("Recruiter Profile already exist");
 
-  return await prisma.recruiterProfile.create({
+  return await prismaClient.recruiterProfile.create({
     data: {
       userId,
       organizationId,
