@@ -41,7 +41,7 @@ export const updateCandidateProfileHandler = async (req, res) => {
   const data = req.body;
   try {
     const user = await updateCandidateProfile(userId, data);
-    return res.status(200).json({ status: "success", data: user });
+    return res.status(201).json({ status: "success", data: user });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       console.error(error.message);

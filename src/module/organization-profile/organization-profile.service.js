@@ -20,7 +20,6 @@ export const createOrganizationProfile = async (data) => {
       websiteUrl: data.websiteUrl,
       linkedinUrl: data.linkedinUrl,
     },
-
   });
 };
 
