@@ -112,6 +112,7 @@ model CandidateProfile {
   publicEmail String?
   linkedinUrl String?
   websiteUrl  String?
+  resumeUrl   String?
 
   isActive     Boolean @default(true)
   isVerified   Boolean @default(true)
@@ -186,6 +187,7 @@ model JobApplication {
   id          String            @id @default(uuid())
   jobId       String
   candidateId String
+  resumeUrl   String
   status      ApplicationStatus @default(APPLIED)
   appliedAt   DateTime          @default(now())
 
