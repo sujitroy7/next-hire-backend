@@ -56,6 +56,9 @@ export const updateJobSchema = z
       isActive: z.boolean().optional(),
       publishedAt: z.coerce.date().nullable().optional(),
     }),
+    params: z.object({
+      jobId: z.string().uuid(),
+    }),
   })
   .refine(
     (data) =>
