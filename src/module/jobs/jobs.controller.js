@@ -1,3 +1,4 @@
+import { getRecruiterProfile } from "../recruiter-profile/recruiter-profile.service.js";
 import {
   createJob,
   updateJob,
@@ -6,22 +7,23 @@ import {
 } from "./jobs.service.js";
 
 export const createJobHandler = async (req, res) => {
-  const {
-    organizationProfile,
-    recruiterProfileId,
-    title,
-    description,
-    employmentType,
-    salaryMin,
-    salaryMax,
-    isActive,
-    publishedAt,
-  } = req.body;
-
   try {
+    const {
+      title,
+      description,
+      employmentType,
+      salaryMin,
+      salaryMax,
+      isActive,
+      publishedAt,
+    } = req.body;
+
+    const recruiterId = req.user.sub;
+    const { organizationId } = await getRecruiterProfile(recruiterId);
+
     const newJob = await createJob({
-      organizationProfile,
-      recruiterProfileId,
+      recruiterId,
+      organizationId,
       title,
       description,
       employmentType,
@@ -30,8 +32,9 @@ export const createJobHandler = async (req, res) => {
       isActive,
       publishedAt,
     });
-    res.status(201).json({ status: "error", data: newJob });
+    res.status(201).json({ status: "success", data: newJob });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ status: "error", message: error.message });
   }
 };
@@ -43,7 +46,7 @@ export const getJobsByRecruiter = async (req, res) => {
     const jobs = await getAllJobsByRecruiter(recruiterId);
     return res.status(200).json({ status: "success", data: jobs });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ status: "error", message: error.message });
   }
 };
@@ -56,13 +59,12 @@ export const getJobDetailsHandler = async (req, res) => {
 
     return res.status(200).json({ status: "success", data: jobDetails });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ status: "error", message: error.message });
   }
 };
 
 export const updateJobDetailsHandler = async (req, res) => {
-  const { jobId } = req.params;
   const {
     organizationId,
     recruiterProfileId,
@@ -74,6 +76,7 @@ export const updateJobDetailsHandler = async (req, res) => {
     isActive,
     publishedAt,
   } = req.body;
+  const { jobId } = req.params;
 
   try {
     const job = await updateJob(jobId, {

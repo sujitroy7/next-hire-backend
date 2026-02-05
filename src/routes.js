@@ -3,6 +3,7 @@ import authRouter from "./module/auth/auth.routes.js";
 import userRouter from "./module/user/user.routes.js";
 import organizationProfileRouter from "./module/organization-profile/organization-profile.routes.js";
 import candidateProfileRouter from "./module/candidate-profile/candidate-profile.routes.js";
+import jobRouter from "./module/jobs/jobs.routes.js";
 
 const router = Router();
 
@@ -11,5 +12,6 @@ router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/organization-profile", organizationProfileRouter);
 router.use("/candidate-profile", candidateProfileRouter);
+router.use("/jobs", jobRouter);
 
 export default router;

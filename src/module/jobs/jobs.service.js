@@ -2,8 +2,8 @@ import { prisma } from "../../config/prisma.js";
 
 export const createJob = async (data) => {
   const {
-    organizationProfile,
-    recruiterProfileId,
+    recruiterId,
+    organizationId,
     title,
     description,
     employmentType,
@@ -14,22 +14,24 @@ export const createJob = async (data) => {
   } = data;
 
   return await prisma.job.create({
-    organizationProfile,
-    recruiterProfileId,
-    title,
-    description,
-    employmentType,
-    salaryMin,
-    salaryMax,
-    isActive,
-    publishedAt,
+    data: {
+      recruiterId,
+      organizationId,
+      title,
+      description,
+      employmentType,
+      salaryMin,
+      salaryMax,
+      isActive,
+      publishedAt,
+    },
   });
 };
 
 export const getAllJobsByRecruiter = async (recruiterId) => {
   return await prisma.job.findMany({
     where: {
-      recruiterProfileId: recruiterId,
+      recruiterId,
     },
   });
 };
@@ -44,8 +46,6 @@ export const getJobDetailes = async (jobId) => {
 
 export const updateJob = async (jobId, data) => {
   const {
-    organizationId,
-    recruiterProfileId,
     title,
     description,
     employmentType,
@@ -57,8 +57,6 @@ export const updateJob = async (jobId, data) => {
 
   return await prisma.job.update({
     data: {
-      organizationId,
-      recruiterProfileId,
       title,
       description,
       employmentType,

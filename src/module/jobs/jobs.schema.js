@@ -10,8 +10,6 @@ export const EmploymentTypeEnum = z.enum([
 export const createJobSchema = z
   .object({
     body: z.object({
-      organizationProfileId: z.string().uuid("Invalid organization profile ID"),
-      recruiterProfileId: z.string().uuid("Invalid organization profile ID"),
       title: z
         .string()
         .min(3, "Job title must be at least 3 characters")
@@ -42,26 +40,22 @@ export const createJobSchema = z
 
 export const updateJobSchema = z
   .object({
-    title: z
-      .string()
-      .min(3, "Job title must be at least 3 characters")
-      .max(255, "Job title is too long")
-      .optional(),
-
-    description: z
-      .string()
-      .min(10, "Job description must be at least 10 characters")
-      .optional(),
-
-    employmentType: EmploymentTypeEnum.optional(),
-
-    salaryMin: z.number().int().positive().optional(),
-
-    salaryMax: z.number().int().positive().optional(),
-
-    isActive: z.boolean().optional(),
-
-    publishedAt: z.coerce.date().nullable().optional(),
+    body: z.object({
+      title: z
+        .string()
+        .min(3, "Job title must be at least 3 characters")
+        .max(255, "Job title is too long")
+        .optional(),
+      description: z
+        .string()
+        .min(10, "Job description must be at least 10 characters")
+        .optional(),
+      employmentType: EmploymentTypeEnum.optional(),
+      salaryMin: z.number().int().positive().optional(),
+      salaryMax: z.number().int().positive().optional(),
+      isActive: z.boolean().optional(),
+      publishedAt: z.coerce.date().nullable().optional(),
+    }),
   })
   .refine(
     (data) =>
