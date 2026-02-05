@@ -17,7 +17,6 @@ export const createRecruiterUserHandler = async (req, res) => {
 
   try {
     const organizationId = req?.user?.sub;
-    console.log({ organizationId: req.user.sub + "Hello" });
 
     const user = await prisma.$transaction(async (tx) => {
       const user = await createUser({ email, password, userType }, tx);

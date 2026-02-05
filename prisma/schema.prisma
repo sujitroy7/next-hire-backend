@@ -21,7 +21,6 @@ enum UserType {
 enum EmploymentType {
   FULL_TIME
   PART_TIME
-  TEMPORARY
   INTERNSHIP
   CONTRACTUAL
 }
