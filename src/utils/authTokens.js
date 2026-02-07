@@ -70,6 +70,12 @@ export const getRefreshCookieOptions = () => ({
   path: "/api/auth/refresh",
 });
 
+export const getCsrfCookieOptions = () => ({
+  secure: true,
+  sameSite: "lax",
+  path: "/api/auth/refresh",
+});
+
 export const getRequestTokens = (req) => {
   let authToken = req.cookies?.["auth-token"];
   let refreshToken = req.cookies?.["refresh-token"];

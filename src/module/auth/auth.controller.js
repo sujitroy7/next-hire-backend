@@ -1,7 +1,7 @@
 import { authenticateUser, getUserById } from "./auth.service.js";
 import {
-  getAccessCookieOptions,
   getAccessTokenExpiresAt,
+  getCsrfCookieOptions,
   getRefreshCookieOptions,
   getRefreshTokenExpiresAt,
   getRequestTokens,
@@ -9,10 +9,12 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from "../../utils/authTokens.js";
+import crypto from "crypto";
 
-const buildAuthResponse = (user) => ({
+const buildAuthResponse = (user, accessToken) => ({
   user,
   roles: [user.userType],
+  accessToken,
   session: {
     accessTokenExpiresAt: getAccessTokenExpiresAt(),
     refreshTokenExpiresAt: getRefreshTokenExpiresAt(),
@@ -32,14 +34,15 @@ export const loginHandler = async (req, res) => {
     }
 
     const accessToken = signAccessToken(user);
+    const csrfToken = crypto.randomUUID();
     const refreshToken = signRefreshToken(user);
 
-    res.cookie("auth-token", accessToken, getAccessCookieOptions());
     res.cookie("refresh-token", refreshToken, getRefreshCookieOptions());
+    res.cookie("csrf-token", csrfToken, getCsrfCookieOptions());
 
     return res
       .status(200)
-      .json({ status: "success", data: buildAuthResponse(user) });
+      .json({ status: "success", data: buildAuthResponse(user, accessToken) });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ status: "error", message: error.message });
@@ -48,12 +51,16 @@ export const loginHandler = async (req, res) => {
 
 export const refreshHandler = async (req, res) => {
   const { refreshToken } = getRequestTokens(req);
+  const csrfCookie = req.cookies.csrfToken;
+  const csrfHeader = req.headers["x-csrf-token"];
 
   if (!refreshToken) {
     return res
       .status(401)
       .json({ status: "error", message: "Refresh token required" });
   }
+
+  if (!csrfCookie || csrfHeader !== csrfCookie) return res.status(403);
 
   try {
     const payload = verifyRefreshToken(refreshToken);
@@ -72,14 +79,16 @@ export const refreshHandler = async (req, res) => {
     }
 
     const accessToken = signAccessToken(user);
+    const newCsrfToken = crypto.randomUUID();
     const newRefreshToken = signRefreshToken(user);
 
-    res.cookie("auth-token", accessToken, getAccessCookieOptions());
     res.cookie("refresh-token", newRefreshToken, getRefreshCookieOptions());
+    res.cookie("csrf-token", newCsrfToken, getCsrfCookieOptions());
 
-    return res
-      .status(200)
-      .json({ status: "success", data: buildAuthResponse(user) });
+    return res.status(200).json({
+      status: "success",
+      data: buildAuthResponse(user, accessToken),
+    });
   } catch (error) {
     return res
       .status(401)
@@ -88,8 +97,8 @@ export const refreshHandler = async (req, res) => {
 };
 
 export const logoutHandler = async (_req, res) => {
-  res.clearCookie("auth-token", getAccessCookieOptions());
   res.clearCookie("refresh-token", getRefreshCookieOptions());
+  res.clearCookie("csrf-token", newCsrfToken, getCsrfCookieOptions());
 
   return res.status(200).json({ status: "success" });
 };
