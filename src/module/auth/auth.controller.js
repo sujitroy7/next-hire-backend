@@ -4,6 +4,7 @@ import {
   getAccessTokenExpiresAt,
   getRefreshCookieOptions,
   getRefreshTokenExpiresAt,
+  getRequestTokens,
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
@@ -46,7 +47,7 @@ export const loginHandler = async (req, res) => {
 };
 
 export const refreshHandler = async (req, res) => {
-  const refreshToken = req.cookies?.["refresh-token"];
+  const { refreshToken } = getRequestTokens(req);
 
   if (!refreshToken) {
     return res

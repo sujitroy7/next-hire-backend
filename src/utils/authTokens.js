@@ -67,7 +67,7 @@ export const getAccessCookieOptions = () => ({
 export const getRefreshCookieOptions = () => ({
   ...getCookieBaseOptions(),
   maxAge: REFRESH_TOKEN_TTL_MS,
-  path: "/auth/refresh",
+  path: "/api/auth/refresh",
 });
 
 export const getRequestTokens = (req) => {

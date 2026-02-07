@@ -16,7 +16,7 @@ router.post(
   "/recruiter",
   authenticate(["ORGANIZATION"]),
   validateRequest(createRecruiterUserSchema),
-  createRecruiterUserHandler
+  createRecruiterUserHandler,
 );
 
 // todo: update user password API
