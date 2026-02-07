@@ -1,11 +1,10 @@
 import jwt from "jsonwebtoken";
-import { getRequestTokens } from "../utils/authTokens.js";
 import { requireEnv } from "../utils/env.js";
 
 export const authenticate = (allowedRoles = []) => {
   return (req, res, next) => {
     try {
-      const { authToken } = getRequestTokens(req);
+      const authToken = req.headers?.authorization?.split(" ")?.[1];
 
       if (!authToken) throw new Error("Token required!");
 

@@ -4,7 +4,6 @@ import {
   getCsrfCookieOptions,
   getRefreshCookieOptions,
   getRefreshTokenExpiresAt,
-  getRequestTokens,
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
@@ -50,7 +49,7 @@ export const loginHandler = async (req, res) => {
 };
 
 export const refreshHandler = async (req, res) => {
-  const { refreshToken } = getRequestTokens(req);
+  let refreshToken = req.cookies?.["refresh-token"];
   const csrfCookie = req.cookies.csrfToken;
   const csrfHeader = req.headers["x-csrf-token"];
 
