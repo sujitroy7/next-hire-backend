@@ -4,12 +4,15 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import router from "./routes.js";
 import { requireEnv } from "./utils/env.js";
+import morgan from "morgan";
 
 export const app = express();
 
 if (process.env.TRUST_PROXY === "true") {
   app.set("trust proxy", 1);
 }
+
+app.use(morgan("dev"));
 
 app.use(
   cors({
