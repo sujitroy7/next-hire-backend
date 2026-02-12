@@ -1,7 +1,7 @@
 import {
   authenticateUser,
   createRefreshToken,
-  updateRefreshToken,
+  revokeRefreshToken,
 } from "./auth.service.js";
 import {
   generatePermissionToken,
@@ -66,7 +66,7 @@ export const refreshHandler = async (req, res) => {
 
   try {
     // update old refresh token on DB
-    const storedToken = await updateRefreshToken(refreshToken);
+    const storedToken = await revokeRefreshToken(refreshToken);
     if (storedToken === null)
       return res
         .status(403)
@@ -104,10 +104,18 @@ export const refreshHandler = async (req, res) => {
   }
 };
 
-export const logoutHandler = async (_req, res) => {
-  res.clearCookie("refresh-token", getRefreshCookieOptions());
-  res.clearCookie("permissions-token", getPermissionCookieOptions());
-  res.clearCookie("access-token", getAccessCookieOptions());
-
-  return res.status(200).json({ status: "success" });
+export const logoutHandler = async (req, res) => {
+  try {
+    const refreshToken = req.cookies["refresh-token"];
+    if (refreshToken) {
+      await revokeRefreshToken(refreshToken);
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    res.clearCookie("refresh-token", getRefreshCookieOptions());
+    res.clearCookie("permissions-token", getPermissionCookieOptions());
+    res.clearCookie("access-token", getAccessCookieOptions());
+    return res.status(200).json({ status: "success" });
+  }
 };

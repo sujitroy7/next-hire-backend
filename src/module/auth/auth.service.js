@@ -46,7 +46,7 @@ export const getRefreshToken = async (refreshToken) => {
   });
 };
 
-export const updateRefreshToken = async (refreshToken) => {
+export const revokeRefreshToken = async (refreshToken) => {
   const storedToken = await getRefreshToken(refreshToken);
 
   if (
