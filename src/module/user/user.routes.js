@@ -3,6 +3,7 @@ import {
   createRecruiterUserHandler,
   createUserHandler,
   getAllUsersHandler,
+  getMyUserDetailsHandler,
 } from "./user.controller.js";
 import { validateRequest } from "../../middleware/validateRequest.js";
 import { createUserSchema, createRecruiterUserSchema } from "./user.schema.js";
@@ -17,6 +18,11 @@ router.post(
   authenticate(["ORGANIZATION"]),
   validateRequest(createRecruiterUserSchema),
   createRecruiterUserHandler,
+);
+router.get(
+  "/me",
+  authenticate(["ORGANIZATION", "RECRUITER", "CANDIDATE"]),
+  getMyUserDetailsHandler,
 );
 
 // todo: update user password API

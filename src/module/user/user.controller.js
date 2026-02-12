@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import { createRecruiterProfile } from "../recruiter-profile/recruiter-profile.service.js";
-import { createUser, getUsers } from "./user.service.js";
+import { createUser, getUserById, getUsers } from "./user.service.js";
 
 export const createUserHandler = async (req, res) => {
   const data = req.body;
@@ -28,7 +28,7 @@ export const createRecruiterUserHandler = async (req, res) => {
           firstName,
           lastName,
         },
-        tx
+        tx,
       );
       return user;
     });
@@ -44,6 +44,16 @@ export const getAllUsersHandler = async (req, res) => {
   try {
     const users = await getUsers();
     return res.status(200).json({ status: "success", data: users });
+  } catch (error) {
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const getMyUserDetailsHandler = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const userDetails = await getUserById(userId);
+    return res.status(200).json({ status: "success", data: userDetails });
   } catch (error) {
     return res.status(500).json({ status: "error", message: error.message });
   }
