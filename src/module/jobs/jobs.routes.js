@@ -22,7 +22,7 @@ router.get("/recruiter", authenticate(["RECRUITER"]), getJobsByRecruiter);
 router.get(
   "/",
   validateRequest(getCandidateJobsSchema),
-  getCandidateJobsHandler
+  getCandidateJobsHandler,
 );
 // get any job by id
 router.get("/:jobId", getJobDetailsHandler);
@@ -31,13 +31,13 @@ router.post(
   "/",
   authenticate(["RECRUITER"]),
   validateRequest(createJobSchema),
-  createJobHandler
+  createJobHandler,
 );
 // for recruiter updating existing job details
 router.patch(
   "/:jobId",
   authenticate(["RECRUITER"]),
   validateRequest(updateJobSchema),
-  updateJobDetailsHandler
+  updateJobDetailsHandler,
 );
 export default router;

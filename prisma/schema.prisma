@@ -128,19 +128,19 @@ model CandidateProfile {
 }
 
 model CandidateExperience {
-  id String @id @default(uuid())
+  id                 String @id @default(uuid())
+  candidateProfileId String
 
   companyName    String
   jobTitle       String
-  employmentType EmploymentType
+  employmentType EmploymentType @default(FULL_TIME)
   description    String?
   location       String?
 
   startDate DateTime
   endDate   DateTime?
 
-  candidateProfile   CandidateProfile @relation(fields: [candidateProfileId], references: [id])
-  candidateProfileId String
+  candidateProfile CandidateProfile @relation(fields: [candidateProfileId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
