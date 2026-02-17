@@ -48,11 +48,11 @@ export const updateCandidateProfileSchema = z.object({
     isActive: z.boolean().optional(),
     isVerified: z.boolean().optional(),
     isOpenToWork: z.boolean().optional(),
-    jobExperiences: z
+    experiences: z
       .array(
         z.object({
           id: z.string().optional(),
-          company: z.string().min(1, "Company Name is required"),
+          companyName: z.string().min(1, "Company Name is required"),
           jobTitle: z.string().min(1, "Role is required"),
           startDate: z.string().datetime(),
           endDate: z.string().datetime().nullable().optional(),

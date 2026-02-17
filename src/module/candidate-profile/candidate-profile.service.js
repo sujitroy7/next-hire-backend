@@ -32,7 +32,7 @@ export const getCandidateProfile = async (userId) => {
 };
 
 export const updateCandidateProfile = async (userId, data) => {
-  const { jobExperiences, skills: _, ...profileData } = data;
+  const { experiences, skills: _, ...profileData } = data;
 
   const candidateProfile = await prisma.candidateProfile.findFirst({
     where: { userId },
@@ -50,13 +50,13 @@ export const updateCandidateProfile = async (userId, data) => {
     }
 
     // 2. Handle Job Experiences if provided
-    if (jobExperiences) {
+    if (experiences) {
       const existingExperiences = await tx.candidateExperience.findMany({
         where: { candidateProfileId: candidateProfile.id },
       });
 
       const existingIds = existingExperiences.map((ex) => ex.id);
-      const incomingIds = jobExperiences
+      const incomingIds = experiences
         .filter((job) => job.id)
         .map((job) => job.id);
 
@@ -73,7 +73,7 @@ export const updateCandidateProfile = async (userId, data) => {
       }
 
       // Execute updates and creations
-      for (const job of jobExperiences) {
+      for (const job of experiences) {
         if (job.id && existingIds.includes(job.id)) {
           // Update existing
           await tx.candidateExperience.update({
