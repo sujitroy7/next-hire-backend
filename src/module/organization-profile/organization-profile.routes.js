@@ -15,7 +15,7 @@ const router = Router();
 router.post(
   "/",
   validateRequest(createOrganizationProfileSchema),
-  createOrganizationProfileHandler
+  createOrganizationProfileHandler,
 );
 
 router.get("/:userId", getOrganizationProfileHandler);
@@ -23,7 +23,7 @@ router.get("/:userId", getOrganizationProfileHandler);
 router.patch(
   "/:userId",
   validateRequest(updateOrganizationProfileSchema),
-  updateOrganizationProfileHandler
+  updateOrganizationProfileHandler,
 );
 
 export default router;

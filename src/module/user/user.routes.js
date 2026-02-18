@@ -11,21 +11,25 @@ import { authenticate } from "../../middleware/authenticate.js";
 
 const router = Router();
 
+// get all avilable user on the DB
 router.get("/", getAllUsersHandler);
+
+// create candidate and organization user | setup the profile with default data
 router.post("/", validateRequest(createUserSchema), createUserHandler);
+
+// create recruiter user | setup the profile with default data
 router.post(
   "/recruiter",
   authenticate(["ORGANIZATION"]),
   validateRequest(createRecruiterUserSchema),
   createRecruiterUserHandler,
 );
+
+// get current logged in user details
 router.get(
   "/me",
   authenticate(["ORGANIZATION", "RECRUITER", "CANDIDATE"]),
   getMyUserDetailsHandler,
 );
-
-// todo: update user password API
-// router.post('/password', validateRequest(updateUserPasswordSchema), updateUserPasswordHandler)
 
 export default router;

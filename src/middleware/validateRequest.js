@@ -9,13 +9,13 @@ export const validateRequest = (schema) => {
         params: req.params,
       });
       if (parsed.body) {
-        req.body = { ...req.body, ...parsed.body };
+        req.body = parsed.body;
       }
       // if (parsed.query) {
       //   req.query = { ...req.query, ...parsed.query };
       // }
       if (parsed.params) {
-        req.params = { ...req.params, ...parsed.params };
+        req.params = parsed.params;
       }
 
       next();

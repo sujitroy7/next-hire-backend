@@ -33,6 +33,26 @@ enum ApplicationStatus {
   HIRED
 }
 
+enum OrganizationType {
+  TECHNOLOGY
+  FINANCE
+  HEALTHCARE
+  EDUCATION
+  RETAIL
+  MANUFACTURING
+  GOVERMENT
+  NON_PROFIT
+  OTHER
+}
+
+enum EmployeeCountEnum {
+  RANGE_1_10
+  RANGE_11_50
+  RANGE_51_200
+  RANGE_201_500
+  RANGE_501_PLUS
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -53,21 +73,18 @@ model User {
   refreshTokens          RefreshToken[]
 }
 
-model OrganizationType {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  organizationProfiles OrganizationProfile[]
-}
-
 model OrganizationProfile {
-  id                 String  @id @default(uuid())
-  userId             String  @unique
-  name               String
-  about              String?
-  isActive           Boolean @default(true)
-  isVerified         Boolean @default(false)
-  organizationTypeId Int?
+  id               String             @id @default(uuid())
+  userId           String             @unique
+  name             String
+  about            String?
+  isActive         Boolean            @default(true)
+  isVerified       Boolean            @default(false)
+  organizationType OrganizationType?
+  employeeCount    EmployeeCountEnum?
+
+  logoUrl       String?
+  galleryImages String[]
 
   publicEmail String?
   publicPhone String?
@@ -77,8 +94,7 @@ model OrganizationProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  organizationType OrganizationType? @relation(fields: [organizationTypeId], references: [id])
-  user             User              @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model RecruiterProfile {
@@ -150,11 +166,11 @@ model Address {
   id String @id @default(uuid())
 
   country     String
-  state       String?
+  state       String
   city        String
-  streetLine1 String
-  streetLine2 String?
   postalCode  String?
+  streetLine1 String?
+  streetLine2 String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
