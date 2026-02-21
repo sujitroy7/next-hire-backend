@@ -66,7 +66,7 @@ export function generatePermissionToken(userId, userRole) {
       role: userRole, // ORGANIZATION, RECRUITER, CANDIDATE
     },
     requireEnv("PERMISSIONS_SECRET"),
-    { expiresIn: "15m" },
+    { expiresIn: "15d" },
   );
 }
 
