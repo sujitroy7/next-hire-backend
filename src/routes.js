@@ -13,7 +13,7 @@ router.use("/auth", authRouter);
 router.use("/users", userRouter);
 router.use("/organization-profile", organizationProfileRouter);
 router.use("/candidate-profile", candidateProfileRouter);
-router.use("/jobs", jobRouter);
+router.use("/", jobRouter);
 router.use("/job-applications", jobApplicationRouter);
 
 export default router;

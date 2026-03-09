@@ -60,6 +60,7 @@ export const getRecruiterProfile = async (userId) => {
       linkedinUrl: true,
       about: true,
       isActive: true,
+      organizationId: true,
       organization: {
         select: {
           organizationProfile: {

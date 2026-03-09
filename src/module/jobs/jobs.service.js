@@ -28,18 +28,45 @@ export const createJob = async (data) => {
   });
 };
 
-export const getAllJobsByRecruiter = async (recruiterId) => {
-  return await prisma.job.findMany({
-    where: {
-      recruiterId,
-    },
-  });
+export const getAllJobsByRecruiter = async (filters) => {
+  const { page, limit, search, recruiterId, status } = filters;
+
+  const pageNumber =
+    Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+  const limitNumber =
+    Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+
+  const where = {
+    recruiterId,
+    ...(status ? { status } : {}),
+    ...(search
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  const [total, jobs] = await Promise.all([
+    prisma.job.count({ where }),
+    prisma.job.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (pageNumber - 1) * limitNumber,
+      take: limitNumber,
+    }),
+  ]);
+
+  return { jobs, total, page: pageNumber, limit: limitNumber };
 };
 
 export const getJobDetailes = async (jobId) => {
   return await prisma.job.findFirst({
     where: {
       id: jobId,
+      status: "PUBLISHED",
     },
   });
 };
@@ -78,6 +105,8 @@ export const getCandidateJobs = async (filters) => {
     sortBy,
     sortOrder,
     employmentType,
+    workplaceType,
+    experienceLevel,
     isActive,
     organizationId,
     recruiterId,
@@ -107,8 +136,8 @@ export const getCandidateJobs = async (filters) => {
     typeof isActive === "boolean"
       ? isActive
       : typeof isActive === "string"
-      ? isActive.toLowerCase() === "true"
-      : true;
+        ? isActive.toLowerCase() === "true"
+        : true;
   const normalizedSalaryMin = Number.isFinite(Number(salaryMin))
     ? Number(salaryMin)
     : undefined;
@@ -117,44 +146,52 @@ export const getCandidateJobs = async (filters) => {
     : undefined;
 
   const where = {
-    ...(employmentType ? { employmentType } : {}),
-    ...(typeof normalizedIsActive === "boolean"
-      ? { isActive: normalizedIsActive }
-      : { isActive: true }),
-    ...(organizationId ? { organizationId } : {}),
-    ...(recruiterId ? { recruiterId } : {}),
-    ...(normalizedSalaryMin !== undefined
-      ? { salaryMin: { gte: normalizedSalaryMin } }
-      : {}),
-    ...(normalizedSalaryMax !== undefined
-      ? { salaryMax: { lte: normalizedSalaryMax } }
-      : {}),
-    ...(publishedFrom || publishedTo
-      ? {
-          publishedAt: {
-            ...(publishedFrom ? { gte: publishedFrom } : {}),
-            ...(publishedTo ? { lte: publishedTo } : {}),
-          },
-        }
-      : {}),
-    ...(createdFrom || createdTo
-      ? {
-          createdAt: {
-            ...(createdFrom ? { gte: createdFrom } : {}),
-            ...(createdTo ? { lte: createdTo } : {}),
-          },
-        }
-      : {}),
-    ...(search
-      ? {
-          OR: [
-            { title: { contains: search, mode: "insensitive" } },
-            { description: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : {}),
+    status: "PUBLISHED",
+    isActive:
+      typeof normalizedIsActive === "boolean" ? normalizedIsActive : true,
   };
 
+  if (employmentType) {
+    where.employmentType = { in: employmentType };
+  }
+
+  if (workplaceType) {
+    where.workplaceType = { in: workplaceType };
+  }
+
+  if (experienceLevel) {
+    where.experienceLevel = { in: experienceLevel };
+  }
+
+  if (organizationId) where.organizationId = organizationId;
+  if (recruiterId) where.recruiterId = recruiterId;
+
+  if (normalizedSalaryMin !== undefined) {
+    where.salaryMin = { gte: normalizedSalaryMin };
+  }
+
+  if (normalizedSalaryMax !== undefined) {
+    where.salaryMax = { lte: normalizedSalaryMax };
+  }
+
+  if (publishedFrom || publishedTo) {
+    where.publishedAt = {};
+    if (publishedFrom) where.publishedAt.gte = publishedFrom;
+    if (publishedTo) where.publishedAt.lte = publishedTo;
+  }
+
+  if (createdFrom || createdTo) {
+    where.createdAt = {};
+    if (createdFrom) where.createdAt.gte = createdFrom;
+    if (createdTo) where.createdAt.lte = createdTo;
+  }
+
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
   const [total, jobs] = await Promise.all([
     prisma.job.count({ where }),
     prisma.job.findMany({
@@ -166,4 +203,84 @@ export const getCandidateJobs = async (filters) => {
   ]);
 
   return { jobs, total, page: pageNumber, limit: limitNumber };
+};
+
+export const getJobDetailsForRecruiter = async (jobId, recruiterId) => {
+  return await prisma.job.findFirst({
+    where: {
+      id: jobId,
+      recruiterId,
+    },
+  });
+};
+
+export const updateJobStatus = async (jobId, status) => {
+  return await prisma.job.update({
+    where: { id: jobId },
+    data: { status },
+  });
+};
+
+export const getJobsByOrganization = async (
+  organizationId,
+  page,
+  limit,
+  search,
+  status,
+) => {
+  const pageNumber =
+    Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+  const limitNumber =
+    Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+
+  const where = {
+    organizationId,
+    ...(status ? { status } : {}),
+    ...(search
+      ? { OR: [{ title: { contains: search, mode: "insensitive" } }] }
+      : {}),
+  };
+
+  const [total, jobs] = await Promise.all([
+    prisma.job.count({ where }),
+    prisma.job.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (pageNumber - 1) * limitNumber,
+      take: limitNumber,
+    }),
+  ]);
+
+  return { jobs, total, page: pageNumber, limit: limitNumber };
+};
+
+export const getJobDetailsForOrganization = async (jobId, organizationId) => {
+  return await prisma.job.findFirst({
+    where: {
+      id: jobId,
+      organizationId,
+    },
+  });
+};
+
+export const getJobTitlesForAutocomplete = async (searchQuery, limit) => {
+  const titles = await prisma.job.findMany({
+    where: {
+      status: "PUBLISHED",
+      title: {
+        contains: searchQuery,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      title: true,
+    },
+    distinct: ["title"],
+    take: limit,
+    orderBy: {
+      title: "asc",
+    },
+  });
+
+  return titles.map((job) => job.title);
 };

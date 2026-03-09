@@ -25,6 +25,34 @@ enum EmploymentType {
   CONTRACTUAL
 }
 
+enum WorkplaceType {
+  REMOTE
+  HYBRID
+  ON_SITE
+}
+
+enum ExperienceLevel {
+  UNDER_1_YEAR
+  YEARS_1_TO_2
+  YEARS_2_TO_3
+  YEARS_3_TO_5
+  YEARS_5_TO_10
+  YEARS_10_PLUS
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum SalaryInterval {
+  HOURLY
+  MONTHLY
+  YEARLY
+}
+
 enum ApplicationStatus {
   APPLIED
   REVIEWING
@@ -182,22 +210,42 @@ model Job {
   organizationId String
   recruiterId    String
 
-  title       String
-  description String
+  title         String
+  description   String
+  department    String?
+  location      String?
+  workplaceType WorkplaceType @default(ON_SITE)
 
-  employmentType EmploymentType
+  employmentType  EmploymentType
+  experienceLevel ExperienceLevel?
+
+  // Salary
+  currency       String?         @default("USD")
   salaryMin      Int?
   salaryMax      Int?
+  salaryInterval SalaryInterval?
 
-  isActive    Boolean   @default(true)
+  // Application
+  skills           String[]
+  vacancies        Int?     @default(1)
+  externalApplyUrl String?
+
+  // Status & Lifecycle
+  status      JobStatus @default(DRAFT)
+  isActive    Boolean   @default(true) // retained for simple toggling if needed
   publishedAt DateTime?
-  // expiresAt   DateTime? // introduce later
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   organization    User?            @relation("JobOrganization", fields: [organizationId], references: [id])
   recruiter       User?            @relation("JobRecruiter", fields: [recruiterId], references: [id])
   jobApplications JobApplication[]
+
+  search_vector Unsupported("tsvector")?
+
+  @@index([search_vector], type: Gin)
 }
 
 model JobApplication {

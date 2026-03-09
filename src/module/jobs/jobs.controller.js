@@ -5,6 +5,11 @@ import {
   getAllJobsByRecruiter,
   getJobDetailes,
   getCandidateJobs,
+  getJobDetailsForRecruiter,
+  updateJobStatus,
+  getJobsByOrganization,
+  getJobDetailsForOrganization,
+  getJobTitlesForAutocomplete,
 } from "./jobs.service.js";
 
 export const createJobHandler = async (req, res) => {
@@ -40,12 +45,38 @@ export const createJobHandler = async (req, res) => {
   }
 };
 
-export const getJobsByRecruiter = async (req, res) => {
+export const getJobsByRecruiterHandler = async (req, res) => {
   const recruiterId = req?.user?.sub;
+  const { page, limit, search, status } = req.query;
 
   try {
-    const jobs = await getAllJobsByRecruiter(recruiterId);
-    return res.status(200).json({ status: "success", data: jobs });
+    const {
+      jobs,
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+    } = await getAllJobsByRecruiter({
+      recruiterId,
+      page,
+      limit,
+      search,
+      status,
+    });
+
+    const totalPages = Math.ceil(total / limitNumber);
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        data: jobs,
+        pagination: {
+          total,
+          page: pageNumber,
+          limit: limitNumber,
+          totalPages,
+        },
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ status: "error", message: error.message });
@@ -57,6 +88,12 @@ export const getJobDetailsHandler = async (req, res) => {
 
   try {
     const jobDetails = await getJobDetailes(jobId);
+
+    if (!jobDetails) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Job not found" });
+    }
 
     return res.status(200).json({ status: "success", data: jobDetails });
   } catch (error) {
@@ -105,6 +142,8 @@ export const getCandidateJobsHandler = async (req, res) => {
     sortBy,
     sortOrder,
     employmentType,
+    workplaceType,
+    experienceLevel,
     isActive,
     organizationId,
     recruiterId,
@@ -118,13 +157,19 @@ export const getCandidateJobsHandler = async (req, res) => {
   } = req.query;
 
   try {
-    const { jobs, total, page: pageNumber, limit: limitNumber } =
-      await getCandidateJobs({
+    const {
+      jobs,
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+    } = await getCandidateJobs({
       page,
       limit,
       sortBy,
       sortOrder,
       employmentType,
+      workplaceType,
+      experienceLevel,
       isActive,
       organizationId,
       recruiterId,
@@ -141,15 +186,129 @@ export const getCandidateJobsHandler = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      data: jobs,
-      meta: {
-        page: pageNumber,
-        limit: limitNumber,
-        total,
-        totalPages,
-        hasNextPage: pageNumber < totalPages,
-        hasPrevPage: pageNumber > 1,
+      data: {
+        data: jobs,
+        pagination: {
+          total,
+          page: pageNumber,
+          limit: limitNumber,
+          totalPages,
+        },
       },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const getRecruiterJobDetailHandler = async (req, res) => {
+  const { jobId } = req.params;
+  const recruiterId = req.user.sub;
+
+  try {
+    const jobDetails = await getJobDetailsForRecruiter(jobId, recruiterId);
+    if (!jobDetails) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Job not found or access denied" });
+    }
+    return res.status(200).json({ status: "success", data: jobDetails });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const updateJobStatusHandler = async (req, res) => {
+  const { jobId } = req.params;
+  const { status } = req.body;
+  const recruiterId = req.user.sub;
+
+  try {
+    const job = await getJobDetailsForRecruiter(jobId, recruiterId);
+    if (!job) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Job not found or access denied" });
+    }
+
+    const updatedJob = await updateJobStatus(jobId, status);
+    return res.status(200).json({ status: "success", data: updatedJob });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const getOrganizationJobsHandler = async (req, res) => {
+  const organizationId = req.user.sub;
+  const { page, limit, search, status } = req.query;
+
+  try {
+    const {
+      jobs,
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+    } = await getJobsByOrganization(
+      organizationId,
+      page,
+      limit,
+      search,
+      status,
+    );
+
+    const totalPages = Math.ceil(total / limitNumber);
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        data: jobs,
+        pagination: {
+          total,
+          page: pageNumber,
+          limit: limitNumber,
+          totalPages,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const getOrganizationJobDetailHandler = async (req, res) => {
+  const { jobId } = req.params;
+  const organizationId = req.user.sub;
+
+  try {
+    const jobDetails = await getJobDetailsForOrganization(
+      jobId,
+      organizationId,
+    );
+    if (!jobDetails) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Job not found or access denied" });
+    }
+    return res.status(200).json({ status: "success", data: jobDetails });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const getJobTitleAutocompleteHandler = async (req, res) => {
+  const { query, limit } = req.query;
+
+  try {
+    const titles = await getJobTitlesForAutocomplete(query, limit);
+
+    return res.status(200).json({
+      status: "success",
+      data: titles,
     });
   } catch (error) {
     console.error(error);
