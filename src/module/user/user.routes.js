@@ -17,11 +17,11 @@ const router = Router();
 router.get("/", getAllUsersHandler);
 
 // create candidate and organization user | setup the profile with default data
-router.post("/", validateRequest(createUserSchema), createUserHandler);
+router.post("/register", validateRequest(createUserSchema), createUserHandler);
 
 // create recruiter user | setup the profile with default data
 router.post(
-  "/recruiter",
+  "/register/recruiter",
   authenticate(["ORGANIZATION"]),
   validateRequest(createRecruiterUserSchema),
   createRecruiterUserHandler,
