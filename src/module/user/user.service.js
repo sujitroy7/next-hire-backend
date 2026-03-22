@@ -39,25 +39,25 @@ export const getUsers = async () => {
   });
 };
 
-export const getUserById = async (id) => {
-  return prisma.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      email: true,
-      userType: true,
-      createdAt: true,
-      organizationProfile: {
-        select: { name: true },
-      },
-      recruiterProfile: {
-        select: { firstName: true, lastName: true },
-      },
-      candidateProfile: {
-        select: { firstName: true, lastName: true },
-      },
+export const getUserById = async (
+  id,
+  select = {
+    id: true,
+    email: true,
+    userType: true,
+    createdAt: true,
+    organizationProfile: {
+      select: { name: true },
     },
-  });
+    recruiterProfile: {
+      select: { firstName: true, lastName: true },
+    },
+    candidateProfile: {
+      select: { firstName: true, lastName: true },
+    },
+  },
+) => {
+  return prisma.user.findUnique({ where: { id }, select });
 };
 
 export const getRecruitersByOrganization = async (

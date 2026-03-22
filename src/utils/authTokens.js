@@ -2,11 +2,15 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { requireEnv } from "./env.js";
 
-export const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
-export const REFRESH_TOKEN_TTL_MS = 15 * 24 * 60 * 60 * 1000;
+const FIFTEEN_MIN_IN_MS = 15 * 60 * 1000; // 15 Min
+const FIFTEEN_DAY_IN_MS = 15 * 24 * 60 * 60 * 1000; // 15 Days
+
+export const ACCESS_TOKEN_TTL_MS = FIFTEEN_MIN_IN_MS;
+export const PERMISSION_TOKEN_TTL_MS = FIFTEEN_DAY_IN_MS;
+export const REFRESH_TOKEN_TTL_MS = FIFTEEN_DAY_IN_MS;
 
 const accessExpiresIn = "15m";
-const refreshExpiresIn = "15d";
+const permissionExpiresIn = "15d";
 
 const buildTokenPayload = (user) => ({
   sub: user.id,
@@ -23,7 +27,6 @@ export const signAccessToken = (user) => {
 };
 
 const getCookieBaseOptions = () => {
-  const isProd = process.env.NODE_ENV === "production";
   const sameSite = process.env.COOKIE_SAMESITE || "strict";
   const secureEnv = process.env.COOKIE_SECURE;
   const secure = secureEnv === "true" ? true : true; // Always true as requested
@@ -41,6 +44,8 @@ const getCookieBaseOptions = () => {
   return options;
 };
 
+// ------------------ Cookie Config Options ------------------
+
 export const getAccessCookieOptions = () => ({
   ...getCookieBaseOptions(),
   maxAge: ACCESS_TOKEN_TTL_MS,
@@ -55,9 +60,11 @@ export const getRefreshCookieOptions = () => ({
 
 export const getPermissionCookieOptions = () => ({
   ...getCookieBaseOptions(),
-  maxAge: REFRESH_TOKEN_TTL_MS,
+  maxAge: PERMISSION_TOKEN_TTL_MS,
   path: "/",
 });
+
+// ------------------ Generator Functions ------------------
 
 export function generatePermissionToken(userId, userRole) {
   return jwt.sign(
@@ -66,7 +73,7 @@ export function generatePermissionToken(userId, userRole) {
       role: userRole, // ORGANIZATION, RECRUITER, CANDIDATE
     },
     requireEnv("PERMISSIONS_SECRET"),
-    { expiresIn: "15d" },
+    { expiresIn: permissionExpiresIn },
   );
 }
 

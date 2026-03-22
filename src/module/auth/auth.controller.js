@@ -47,6 +47,7 @@ export const loginHandler = async (req, res) => {
       .status(200)
       .json({
         status: "success",
+        expiresAt: Date.now() + getAccessCookieOptions().maxAge,
       });
   } catch (error) {
     console.error(error);
@@ -81,19 +82,26 @@ export const refreshHandler = async (req, res) => {
     });
 
     // return tokens
-    const user = await getUserById(storedToken.userId);
+    const user = await getUserById(storedToken.userId, {
+      id: true,
+      userType: true,
+    });
     const accessToken = signAccessToken(user);
+    const permissionsToken = generatePermissionToken(user.id, user.userType);
+
     res
       .cookie("refresh-token", newRefreshToken, getRefreshCookieOptions())
       .cookie("access-token", accessToken, getAccessCookieOptions())
       .cookie(
         "permissions-token",
-        generatePermissionToken(user.id, user.userType),
+        permissionsToken,
         getPermissionCookieOptions(),
       )
       .status(200)
       .json({
         status: "success",
+        expiresAt: Date.now() + getAccessCookieOptions().maxAge,
+        maxAge: getAccessCookieOptions().maxAge,
       });
   } catch (error) {
     console.error(error);
