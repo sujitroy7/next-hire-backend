@@ -95,7 +95,7 @@ router.patch(
 // List all jobs belonging to organization
 router.get(
   "/organization/jobs",
-  authenticate(["ORGANIZATION"]),
+  authenticate(["ORGANIZATION", "RECRUITER"]),
   validateRequest(paginationSchema),
   getOrganizationJobsHandler,
 );

@@ -242,7 +242,17 @@ export const updateJobStatusHandler = async (req, res) => {
 };
 
 export const getOrganizationJobsHandler = async (req, res) => {
-  const organizationId = req.user.sub;
+  let organizationId;
+
+  if (req.user.role === "ORGANIZATION") {
+    organizationId = req.user.sub;
+  } else if (req.user.role === "RECRUITER") {
+    const recruiter = await getRecruiterProfile(req.user.sub, {
+      organizationId: true,
+    });
+    organizationId = recruiter.organizationId;
+  }
+
   const { page, limit, search, status } = req.query;
 
   try {
