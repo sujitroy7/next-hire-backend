@@ -18,6 +18,8 @@ export const ExperienceLevelEnum = z.enum([
   "YEARS_10_PLUS",
 ]);
 
+export const SalaryIntervalEnum = z.enum(["HOURLY", "MONTHLY", "YEARLY"]);
+
 export const createJobSchema = z
   .object({
     body: z.object({
@@ -28,11 +30,20 @@ export const createJobSchema = z
       description: z
         .string()
         .min(10, "Job description must be at least 10 characters"),
+      department: z.string().max(255).optional(),
+      location: z.string().max(255).optional(),
+      workplaceType: WorkplaceTypeEnum.optional().default("ON_SITE"),
       employmentType: EmploymentTypeEnum,
+      experienceLevel: ExperienceLevelEnum.optional(),
+      currency: z.string().max(3).optional().default("USD"),
       salaryMin: z.number().int().positive().optional(),
       salaryMax: z.number().int().positive().optional(),
-      isActive: z.boolean().optional().default(true),
+      salaryInterval: SalaryIntervalEnum.optional(),
+      skills: z.array(z.string()).optional().default([]),
+      vacancies: z.number().int().positive().optional().default(1),
+      externalApplyUrl: z.string().url().optional().or(z.literal("")),
       publishedAt: z.coerce.date().optional(),
+      expiresAt: z.coerce.date().optional(),
     }),
   })
   .refine(
@@ -61,11 +72,20 @@ export const updateJobSchema = z
         .string()
         .min(10, "Job description must be at least 10 characters")
         .optional(),
+      department: z.string().max(255).optional(),
+      location: z.string().max(255).optional(),
+      workplaceType: WorkplaceTypeEnum.optional(),
       employmentType: EmploymentTypeEnum.optional(),
+      experienceLevel: ExperienceLevelEnum.optional(),
+      currency: z.string().max(3).optional(),
       salaryMin: z.number().int().positive().optional(),
       salaryMax: z.number().int().positive().optional(),
-      isActive: z.boolean().optional(),
+      salaryInterval: SalaryIntervalEnum.optional(),
+      skills: z.array(z.string()).optional(),
+      vacancies: z.number().int().positive().optional(),
+      externalApplyUrl: z.string().url().optional().or(z.literal("")),
       publishedAt: z.coerce.date().nullable().optional(),
+      expiresAt: z.coerce.date().nullable().optional(),
     }),
     params: z.object({
       jobId: z.string().uuid(),
@@ -127,20 +147,6 @@ export const getCandidateJobsSchema = z.object({
           z.array(ExperienceLevelEnum).optional(),
         )
         .optional(),
-      isActive: z
-        .preprocess(
-          (value) => {
-            if (typeof value === "boolean") {
-              return value ? "true" : "false";
-            }
-            if (typeof value === "string") {
-              return value.toLowerCase();
-            }
-            return value;
-          },
-          z.enum(["true", "false"]).default("true"),
-        )
-        .transform((value) => value === "true"),
       organizationId: z.string().uuid().optional(),
       recruiterId: z.string().uuid().optional(),
       search: z.string().min(1).max(200).optional(),

@@ -232,7 +232,6 @@ model Job {
 
   // Status & Lifecycle
   status      JobStatus @default(DRAFT)
-  isActive    Boolean   @default(true) // retained for simple toggling if needed
   publishedAt DateTime?
   expiresAt   DateTime?
 

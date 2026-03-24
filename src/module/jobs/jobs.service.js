@@ -7,10 +7,19 @@ export const createJob = async (data) => {
     title,
     description,
     employmentType,
+    department,
+    location,
+    workplaceType,
+    experienceLevel,
+    currency,
     salaryMin,
     salaryMax,
-    isActive,
+    salaryInterval,
+    skills,
+    vacancies,
+    externalApplyUrl,
     publishedAt,
+    expiresAt,
   } = data;
 
   return await prisma.job.create({
@@ -20,10 +29,19 @@ export const createJob = async (data) => {
       title,
       description,
       employmentType,
+      department,
+      location,
+      workplaceType,
+      experienceLevel,
+      currency,
       salaryMin,
       salaryMax,
-      isActive,
+      salaryInterval,
+      skills,
+      vacancies,
+      externalApplyUrl,
       publishedAt,
+      expiresAt,
     },
   });
 };
@@ -76,10 +94,19 @@ export const updateJob = async (jobId, data) => {
     title,
     description,
     employmentType,
+    department,
+    location,
+    workplaceType,
+    experienceLevel,
+    currency,
     salaryMin,
     salaryMax,
-    isActive,
+    salaryInterval,
+    skills,
+    vacancies,
+    externalApplyUrl,
     publishedAt,
+    expiresAt,
   } = data;
 
   return await prisma.job.update({
@@ -87,10 +114,19 @@ export const updateJob = async (jobId, data) => {
       title,
       description,
       employmentType,
+      department,
+      location,
+      workplaceType,
+      experienceLevel,
+      currency,
       salaryMin,
       salaryMax,
-      isActive,
+      salaryInterval,
+      skills,
+      vacancies,
+      externalApplyUrl,
       publishedAt,
+      expiresAt,
     },
     where: {
       id: jobId,
@@ -107,7 +143,6 @@ export const getCandidateJobs = async (filters) => {
     employmentType,
     workplaceType,
     experienceLevel,
-    isActive,
     organizationId,
     recruiterId,
     search,
@@ -132,12 +167,6 @@ export const getCandidateJobs = async (filters) => {
     Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
   const limitNumber =
     Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
-  const normalizedIsActive =
-    typeof isActive === "boolean"
-      ? isActive
-      : typeof isActive === "string"
-        ? isActive.toLowerCase() === "true"
-        : true;
   const normalizedSalaryMin = Number.isFinite(Number(salaryMin))
     ? Number(salaryMin)
     : undefined;
@@ -147,8 +176,6 @@ export const getCandidateJobs = async (filters) => {
 
   const where = {
     status: "PUBLISHED",
-    isActive:
-      typeof normalizedIsActive === "boolean" ? normalizedIsActive : true,
   };
 
   if (employmentType) {
