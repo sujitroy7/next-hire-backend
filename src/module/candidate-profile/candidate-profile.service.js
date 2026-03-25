@@ -80,7 +80,7 @@ export const updateCandidateProfile = async (userId, data) => {
           await tx.candidateExperience.update({
             where: { id: job.id },
             data: {
-              companyName: job.company,
+              companyName: job.companyName,
               jobTitle: job.jobTitle,
               startDate: job.startDate,
               endDate: job.endDate,
@@ -93,7 +93,7 @@ export const updateCandidateProfile = async (userId, data) => {
           await tx.candidateExperience.create({
             data: {
               candidateProfileId: candidateProfile.id,
-              companyName: job.company,
+              companyName: job.companyName,
               jobTitle: job.jobTitle,
               startDate: job.startDate,
               endDate: job.endDate,
