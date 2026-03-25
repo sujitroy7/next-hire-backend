@@ -167,7 +167,7 @@ export const updateJobApplicationStatusHandler = async (req, res) => {
 export const getOrganizationCandidatesHandler = async (req, res) => {
   const userId = req?.user?.sub;
   const userType = req?.user?.userType;
-  const { page, limit, search, status } = req.query;
+  const { page, limit, search, status, jobId } = req.query;
 
   try {
     let organizationId;
@@ -197,6 +197,7 @@ export const getOrganizationCandidatesHandler = async (req, res) => {
       limit,
       search,
       status,
+      jobId,
     });
 
     const totalPages = Math.ceil(total / limitNumber);

@@ -110,7 +110,7 @@ export const updateJobApplicationStatus = async (applicationId, status) => {
 };
 
 export const getOrganizationCandidates = async (filters) => {
-  const { organizationId, page, limit, search, status } = filters;
+  const { organizationId, page, limit, search, status, jobId } = filters;
 
   const pageNumber =
     Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
@@ -122,6 +122,7 @@ export const getOrganizationCandidates = async (filters) => {
       organizationId,
     },
     ...(status ? { status } : {}),
+    ...(jobId ? { jobId } : {}),
     ...(search
       ? {
           OR: [
