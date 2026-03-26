@@ -80,12 +80,37 @@ export const getAllJobsByRecruiter = async (filters) => {
   return { jobs, total, page: pageNumber, limit: limitNumber };
 };
 
-export const getJobDetailes = async (jobId) => {
+export const getJobDetailes = async (
+  jobId,
+  where = {
+    id: jobId,
+    status: "PUBLISHED",
+  },
+  select = {
+    id: true,
+    title: true,
+    description: true,
+    employmentType: true,
+    department: true,
+    location: true,
+    workplaceType: true,
+    experienceLevel: true,
+    currency: true,
+    salaryMin: true,
+    salaryMax: true,
+    salaryInterval: true,
+    skills: true,
+    vacancies: true,
+    externalApplyUrl: true,
+    publishedAt: true,
+    expiresAt: true,
+    createdAt: true,
+    updatedAt: true,
+  },
+) => {
   return await prisma.job.findFirst({
-    where: {
-      id: jobId,
-      status: "PUBLISHED",
-    },
+    where,
+    select,
   });
 };
 
