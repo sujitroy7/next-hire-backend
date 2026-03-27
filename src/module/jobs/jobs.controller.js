@@ -13,7 +13,6 @@ import {
   getOrganizationDashboardStats,
   getRecentJobsForOrganization,
   getRecruiterDashboardStats,
-  getRecentJobsForRecruiter,
 } from "./jobs.service.js";
 
 export const createJobHandler = async (req, res) => {
@@ -383,14 +382,11 @@ export const getRecruiterDashboardStatsHandler = async (req, res) => {
   const recruiterId = req.user.sub;
 
   try {
-    const [stats, recentJobs] = await Promise.all([
-      getRecruiterDashboardStats(recruiterId),
-      getRecentJobsForRecruiter(recruiterId, 5),
-    ]);
+    const stats = await getRecruiterDashboardStats(recruiterId);
 
     return res.status(200).json({
       status: "success",
-      data: { stats, recentJobs },
+      data: stats,
     });
   } catch (error) {
     console.error(error);
