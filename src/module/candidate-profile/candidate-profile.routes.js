@@ -1,8 +1,10 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   createCandidateProfileHandler,
   getCandidateProfileHandler,
   updateCandidateProfileHandler,
+  extractPdfDataHandler,
 } from "./candidate-profile.controller.js";
 import {
   createCandidateProfileSchema,
@@ -27,6 +29,16 @@ router.patch(
   authenticate(["CANDIDATE"]),
   validateRequest(updateCandidateProfileSchema),
   updateCandidateProfileHandler,
+);
+
+// add a route for extracting pdf data using the microservice
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post(
+  "/extract-resume",
+  authenticate(["CANDIDATE"]),
+  upload.single("resume"),
+  extractPdfDataHandler,
 );
 
 export default router;

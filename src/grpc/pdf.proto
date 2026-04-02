@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pdf;
+
+service PdfService {
+  rpc ProcessPdf (PdfRequest) returns (PdfResponse);
+}
+
+message PdfRequest {
+  bytes file = 1;   // PDF file buffer
+}
+
+message PdfResponse {
+  string structuredData = 1; // JSON string
+}

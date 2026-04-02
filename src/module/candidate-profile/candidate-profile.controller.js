@@ -5,6 +5,7 @@ import {
   updateCandidateProfile,
 } from "./candidate-profile.service.js";
 import { getCandidateExperience } from "./candidate-experiance.services.js";
+import { extractPdfDataGrpc } from "./pdf-processor.client.js";
 
 export const createCandidateProfileHandler = async (req, res) => {
   const data = req.body;
@@ -56,6 +57,21 @@ export const updateCandidateProfileHandler = async (req, res) => {
         .status(500)
         .json({ status: "error", message: "Internal Server Error" });
     }
+    return res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const extractPdfDataHandler = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "No PDF file provided" });
+    }
+    const data = await extractPdfDataGrpc(req.file.buffer);
+    return res.status(200).json({ status: "success", data });
+  } catch (error) {
+    console.error("PDF extraction error:", error);
     return res.status(500).json({ status: "error", message: error.message });
   }
 };
