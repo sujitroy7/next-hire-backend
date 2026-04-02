@@ -5,8 +5,20 @@ import cors from "cors";
 import router from "./routes.js";
 import { requireEnv } from "./utils/env.js";
 import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 
 export const app = express();
+
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    message: "Too many requests from this IP, please try again after 5 minutes",
+  },
+});
+
+app.use(limiter);
 
 if (process.env.TRUST_PROXY === "true") {
   app.set("trust proxy", 1);
